@@ -1,102 +1,45 @@
-# Kubernetes CKS Course Environment
+# Kubernetes Security Scenarios
 
-This is the repository of the [CKS FULL COURSE](https://youtu.be/d9xfB5qaOfg) on Youtube
+Advanced threat scenario library for Kubernetes security engineering. Each scenario presents a realistic attack vector, a vulnerable baseline environment, and a step-by-step hardened resolution.
 
-There is also the [CKS SIMULATOR](https://killer.sh/cks)
+## Scenario Categories
 
+| Category | Scenarios |
+|---|---|
+| Privilege Escalation | Container breakout, RBAC misconfiguration, hostPath abuse |
+| Network Attacks | Pod-to-pod lateral movement, DNS spoofing, service exposure |
+| Supply Chain | Compromised image, missing admission policy, unsigned workload |
+| Secrets Leakage | Env var exposure, etcd plaintext secrets, over-permissive RBAC |
+| Runtime Threats | Unexpected syscalls, privileged container detection, Falco evasion |
+| Cluster Compromise | Kubeconfig theft, API server misconfiguration, etcd access |
 
-## Course Resources
+## Scenario Format
 
-Many sections reference commands or links in their resources.
+Each scenario follows a consistent structure:
 
-[RESOURCES](Resources.md)
-
-## Killercoda Scenarios
-
-Many topics have interactive in-browser Killercoda scenarios at the end. Solve these to test and harden your knowledge!
-
-[SCENARIOS](Scenarios.md)
-
-
-## Support
-https://killer.sh/slack
-https://killer.sh/support
-
-## Setup Cluster in Gcloud
-
-### Setup cks-master
-
-#### Create VM
 ```
-1. create VM:
-name: cks-master
-family: e2-medium (2vCPU, 4GB)
-image: ubuntu24.04 LTS focal
-disk: 50GB
+scenarios/
+└── <scenario-name>/
+    ├── README.md         # Attack description, impact, MITRE mapping
+    ├── setup/            # Vulnerable baseline manifests
+    ├── exploit/          # Reproduction steps
+    └── remediation/      # Hardened configuration and verification
 ```
 
-Like:
-```
-gcloud compute instances create cks-master --zone=europe-west3-c \
---machine-type=e2-medium \
---image=ubuntu-2404-noble-amd64-v20250530 \
---image-project=ubuntu-os-cloud \
---boot-disk-size=50GB
+## Usage
 
-# see available images:
-gcloud compute images list --project=ubuntu-os-cloud --no-standard-images --filter="name~'ubuntu-2404'"
-```
+```bash
+# Deploy a scenario environment
+kubectl apply -f scenarios/<name>/setup/
 
-#### Configure
-```
-sudo -i
-bash <(curl -s https://raw.githubusercontent.com/killer-sh/cks-course-environment/master/cluster-setup/latest/install_master.sh)
+# Follow the README walkthrough
+# Apply remediation
+kubectl apply -f scenarios/<name>/remediation/
+
+# Verify
+bash scenarios/<name>/verify.sh
 ```
 
-### Setup cks-worker
+## Framework Alignment
 
-#### Create VM
-```
-1. create VM:
-name: cks-worker
-family: e2-medium (2vCPU, 4GB)
-image: ubuntu24.04 LTS focal
-disk: 50GB
-```
-
-Like:
-```
-gcloud compute instances create cks-worker --zone=europe-west3-c \
---machine-type=e2-medium \
---image=ubuntu-2404-noble-amd64-v20250530 \
---image-project=ubuntu-os-cloud \
---boot-disk-size=50GB
-
-# see available images:
-gcloud compute images list --project=ubuntu-os-cloud --no-standard-images --filter="name~'ubuntu-2404'"
-```
-
-#### Configure
-```
-sudo -i
-bash <(curl -s https://raw.githubusercontent.com/killer-sh/cks-course-environment/master/cluster-setup/latest/install_worker.sh)
-```
-
-### Connect to cluster
-```
-# install "gcloud" command
-
-# connect "gcloud" to your GCP
-gcloud auth login
-gcloud projects list
-gcloud config set project YOUR_PROJECT
-
-# connect to instance
-gcloud compute instances list
-gcloud compute ssh cks-master
-```
-
-### Open ports
-```
-gcloud compute firewall-rules create nodeports --allow tcp:30000-40000
-```
+Scenarios mapped to **MITRE ATT&CK for Containers** and **CKS exam objectives**.
